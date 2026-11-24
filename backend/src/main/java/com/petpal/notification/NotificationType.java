@@ -1,0 +1,13 @@
+package com.petpal.notification;
+
+public enum NotificationType {
+    BOOKING_REQUESTED,
+    BOOKING_CONFIRMED,
+    BOOKING_DECLINED,
+    BOOKING_CANCELLED,
+    BOOKING_EXPIRED,
+    BOOKING_COMPLETED,
+    PROVIDER_VERIFIED,
+    PROVIDER_REJECTED,
+    REVIEW_RECEIVED
+}

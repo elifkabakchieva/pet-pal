@@ -1,0 +1,53 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="form-row">
+    <div class="field">
+      <label for="pet-name">Name</label>
+      <input id="pet-name" class="input" formControlName="name" aria-describedby="pet-name-error">
+      @if (form.controls.name.touched && form.controls.name.invalid) {
+        <span id="pet-name-error" class="field-error">Enter a name (up to 60 characters).</span>
+      }
+    </div>
+    <div class="field">
+      <label for="pet-species">Species</label>
+      <select id="pet-species" class="input" formControlName="species">
+        @for (option of species; track option) {
+          <option [value]="option">{{ speciesLabels[option] }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="field">
+      <label for="pet-breed">Breed <span class="muted">(optional)</span></label>
+      <input id="pet-breed" class="input" formControlName="breed">
+    </div>
+    <div class="field">
+      <label for="pet-birth">Birth date <span class="muted">(optional)</span></label>
+      <input id="pet-birth" class="input" type="date" formControlName="birthDate" [max]="today">
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="pet-weight">Weight in kg <span class="muted">(optional)</span></label>
+    <input id="pet-weight" class="input" type="number" step="0.1" min="0.1" max="200" formControlName="weightKg"
+           aria-describedby="pet-weight-error">
+    @if (form.controls.weightKg.touched && form.controls.weightKg.invalid) {
+      <span id="pet-weight-error" class="field-error">Weight must be between 0.1 and 200 kg.</span>
+    }
+  </div>
+
+  <div class="field">
+    <label for="pet-notes">Care notes <span class="muted">(optional)</span></label>
+    <textarea id="pet-notes" class="input" formControlName="careNotes" maxlength="1000"
+              aria-describedby="pet-notes-hint"></textarea>
+    <span id="pet-notes-hint" class="hint">Allergies, fears, medication, anything a carer should know.</span>
+  </div>
+
+  <div class="row">
+    <button class="btn btn-primary" type="submit" [disabled]="pending()">
+      {{ pending() ? 'Saving…' : 'Save' }}
+    </button>
+    <button class="btn btn-quiet" type="button" (click)="cancelled.emit()">Cancel</button>
+  </div>
+</form>

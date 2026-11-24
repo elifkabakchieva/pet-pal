@@ -1,0 +1,102 @@
+<section class="container">
+  <p><a routerLink="/bookings">← All bookings</a></p>
+
+  @if (loading() && !detail()) {
+    <p class="muted">Loading the booking…</p>
+  } @else if (detail(); as detail) {
+    @let booking = detail.booking;
+    <div class="page-head">
+      <div>
+        <p class="overline">Booking #{{ booking.id }}</p>
+        <h1>{{ booking.service.title }} for {{ booking.pet.name }}</h1>
+      </div>
+      <pp-status-badge [status]="booking.status" />
+    </div>
+
+    @if (notice(); as message) {
+      <div class="notice notice-success" role="status">{{ message }}</div>
+    }
+    @if (error(); as message) {
+      <div class="notice notice-error" role="alert">{{ message }}</div>
+    }
+
+    <div class="split">
+      <div>
+        <dl class="facts">
+          <dt>When</dt>
+          <dd>{{ booking.startAt | date: 'EEEE d MMMM y, HH:mm' }}–{{ booking.endAt | date: 'HH:mm' }}
+            ({{ durationLabel(booking.service.durationMinutes) }})</dd>
+          <dt>Price</dt>
+          <dd>{{ booking.price | currency: booking.currency }}</dd>
+          <dt>Pet</dt>
+          <dd>{{ booking.pet.name }}, {{ speciesLabels[booking.pet.species] }}@if (booking.pet.breed) {, {{ booking.pet.breed }}}</dd>
+          @if (booking.pet.careNotes) {
+            <dt>Care notes</dt>
+            <dd>{{ booking.pet.careNotes }}</dd>
+          }
+          @if (booking.ownerNotes) {
+            <dt>Note from owner</dt>
+            <dd>{{ booking.ownerNotes }}</dd>
+          }
+          @if (isProvider()) {
+            <dt>Owner</dt>
+            <dd>{{ booking.owner.name }}@if (booking.owner.phone) { · {{ booking.owner.phone }}}</dd>
+          } @else {
+            <dt>Provider</dt>
+            <dd>
+              <a [routerLink]="['/providers', booking.provider.id]">{{ booking.provider.displayName }}</a>
+              · @if (booking.provider.address) { {{ booking.provider.address }}, }{{ booking.provider.city }}
+              @if (booking.provider.phone) { · {{ booking.provider.phone }}}
+            </dd>
+          }
+        </dl>
+
+        @if (buttons().length > 0) {
+          <div class="panel mt-m">
+            <h2>What would you like to do?</h2>
+            @if (needsReason()) {
+              <div class="field">
+                <label for="action-reason">Reason <span class="muted">(optional, shown to the other side)</span></label>
+                <textarea id="action-reason" class="input" maxlength="500" [value]="reason()"
+                          (input)="reasonInput($event)"></textarea>
+              </div>
+            }
+            <div class="row mt-s">
+              @for (action of buttons(); track action) {
+                <button type="button" [disabled]="busy()" (click)="perform(action)"
+                        [class]="action === 'CONFIRM' || action === 'COMPLETE' ? 'btn btn-primary'
+                          : action === 'CANCEL' || action === 'DECLINE' ? 'btn btn-danger' : 'btn'">
+                  {{ actionLabels[action] }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (canReview()) {
+          <pp-review-form [bookingId]="booking.id" [providerName]="booking.provider.displayName" (submitted)="reviewed()" />
+        } @else if (booking.reviewed && !isProvider()) {
+          <p class="muted mt-m">You reviewed this booking. Thank you.</p>
+        }
+      </div>
+
+      <aside>
+        <h2>History</h2>
+        <ol class="list-rows">
+          @for (entry of detail.timeline; track $index) {
+            <li>
+              <strong>{{ statusLabels[entry.toStatus] }}</strong>
+              <span class="muted small"> by {{ entry.actorName }}</span>
+              <div class="muted small">{{ entry.occurredAt | date: 'd MMM y, HH:mm' }}</div>
+              @if (entry.note) {
+                <p class="small m-0">“{{ entry.note }}”</p>
+              }
+            </li>
+          }
+        </ol>
+      </aside>
+    </div>
+  } @else if (error(); as message) {
+    <div class="notice notice-error" role="alert">{{ message }}</div>
+  }
+</section>

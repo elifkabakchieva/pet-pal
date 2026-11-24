@@ -1,0 +1,31 @@
+<form class="panel form mt-m" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <h2>How was it?</h2>
+  <p class="muted m-0">Your review helps other owners choose. It is shown with your first name and initial.</p>
+
+  <fieldset>
+    <legend>Rating for {{ providerName() }}</legend>
+    <div class="row">
+      @for (value of ratings; track value) {
+        <label class="choice">
+          <input type="radio" formControlName="rating" [value]="value">
+          <span><span class="star" aria-hidden="true">{{ '★'.repeat(value) }}</span> {{ value }}</span>
+        </label>
+      }
+    </div>
+  </fieldset>
+
+  <div class="field">
+    <label for="review-comment">Comment <span class="muted">(optional)</span></label>
+    <textarea id="review-comment" class="input" formControlName="comment" maxlength="1000"></textarea>
+  </div>
+
+  @if (error(); as message) {
+    <div class="notice notice-error" role="alert">{{ message }}</div>
+  }
+
+  <div class="row">
+    <button class="btn btn-primary" type="submit" [disabled]="sending()">
+      {{ sending() ? 'Sending…' : 'Send review' }}
+    </button>
+  </div>
+</form>

@@ -1,0 +1,90 @@
+<div class="panel">
+  <h2>Book a time</h2>
+
+  @if (services().length === 0) {
+    <p class="muted">This provider offers no services right now.</p>
+  } @else {
+    <div class="field">
+      <label for="book-service">Service</label>
+      <select id="book-service" class="input" (change)="selectService($event)">
+        @for (service of services(); track service.id) {
+          <option [value]="service.id" [selected]="service.id === offeringId()">
+            {{ service.title }} · {{ durationLabel(service.durationMinutes) }} · {{ service.price | currency: currency() }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="field mt-s">
+      <label for="book-date">Date</label>
+      <input id="book-date" class="input" type="date" [min]="firstDay" [max]="lastDay" [value]="date()"
+             (change)="selectDate($event)">
+    </div>
+
+    <p class="label mt-s">Free times</p>
+    @if (loadingSlots()) {
+      <p class="muted">Checking the calendar…</p>
+    } @else if (slots().length === 0) {
+      <p class="muted">No free times on this day. Try another date.</p>
+    } @else {
+      <ul class="slot-list" aria-label="Free start times">
+        @for (slot of slots(); track slot.startAt) {
+          <li>
+            @if (canBook()) {
+              <button type="button" class="slot" [class.selected]="selectedSlot()?.startAt === slot.startAt"
+                      [attr.aria-pressed]="selectedSlot()?.startAt === slot.startAt" (click)="selectedSlot.set(slot)">
+                {{ slot.startAt | date: 'HH:mm' }}
+              </button>
+            } @else {
+              <span class="slot">{{ slot.startAt | date: 'HH:mm' }}</span>
+            }
+          </li>
+        }
+      </ul>
+    }
+
+    @if (canBook()) {
+      @if (pets().length === 0) {
+        <div class="notice notice-warn">
+          <p>Add your pet first, then come back to book. <a routerLink="/pets">Go to my pets</a>.</p>
+        </div>
+      } @else {
+        <div class="field">
+          <label for="book-pet">Pet</label>
+          <select id="book-pet" class="input" (change)="selectPet($event)">
+            @for (pet of pets(); track pet.id) {
+              <option [value]="pet.id" [selected]="pet.id === petId()">{{ pet.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="field mt-s">
+          <label for="book-notes">Note for the provider <span class="muted">(optional)</span></label>
+          <textarea id="book-notes" class="input" maxlength="500" [value]="notes()" (input)="notesInput($event)"></textarea>
+        </div>
+
+        @if (selectedSlot(); as slot) {
+          <p class="mt-s">
+            <strong>{{ slot.startAt | date: 'EEE d MMM, HH:mm' }}</strong>
+            @if (selectedService(); as service) {
+              · {{ durationLabel(service.durationMinutes) }} · {{ service.price | currency: currency() }}
+            }
+          </p>
+        }
+
+        @if (error(); as message) {
+          <div class="notice notice-error" role="alert">{{ message }}</div>
+        }
+
+        <button class="btn btn-primary mt-s" type="button" [disabled]="sending() || !selectedSlot()" (click)="send()">
+          {{ sending() ? 'Sending…' : 'Send request' }}
+        </button>
+        <p class="hint mt-s">The provider confirms or declines your request. You will get a notification.</p>
+      }
+    } @else if (!auth.isSignedIn()) {
+      <p class="hint"><a routerLink="/login" [queryParams]="{ returnUrl: returnUrl() }">Sign in</a> as a pet owner to book
+        one of these times.</p>
+    } @else {
+      <p class="hint">Only pet owner accounts can book.</p>
+    }
+  }
+</div>

@@ -1,0 +1,25 @@
+.facts-line {
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  margin-top: 2.25rem;
+}
+
+.service {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  p {
+    margin-bottom: 0.35rem;
+  }
+}
+
+aside {
+  @media (min-width: 721px) {
+    position: sticky;
+    top: 1rem;
+  }
+}

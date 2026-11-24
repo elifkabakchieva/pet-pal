@@ -1,0 +1,91 @@
+@if (loading()) {
+  <p class="muted">Loading your profile…</p>
+} @else if (error(); as text) {
+  <div class="notice notice-error" role="alert">
+    <p>{{ text }}</p>
+    <button class="btn btn-small" type="button" (click)="load()">Try again</button>
+  </div>
+} @else if (profile(); as profile) {
+  <div class="row status-line">
+    <span class="label">Status</span>
+    <pp-status-badge [status]="profile.verificationStatus" />
+  </div>
+
+  @switch (profile.verificationStatus) {
+    @case ('DRAFT') {
+      <div class="notice">
+        <p>Your profile is a draft. Complete it, add services and weekly hours, then send it for verification.
+          Owners will see you once an admin has verified it.</p>
+      </div>
+    }
+    @case ('PENDING') {
+      <div class="notice notice-warn">
+        <p>Your profile is waiting for verification since {{ profile.submittedAt | date: 'd MMM y' }}.
+          We will notify you when an admin has looked at it.</p>
+      </div>
+    }
+    @case ('VERIFIED') {
+      <div class="notice notice-success">
+        <p>Your profile is verified and visible to owners.
+          <a [routerLink]="['/providers', profile.id]">See your public page</a>.</p>
+      </div>
+    }
+    @case ('REJECTED') {
+      <div class="notice notice-error">
+        <p><strong>Your profile was not verified.</strong> {{ profile.verificationNote }}</p>
+        <p>Update your profile and send it again.</p>
+      </div>
+    }
+  }
+
+  @if (message(); as msg) {
+    <div class="notice" [class.notice-success]="msg.tone === 'success'" [class.notice-error]="msg.tone === 'error'"
+         role="status">{{ msg.text }}</div>
+  }
+
+  <form class="form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="field">
+      <label for="profile-name">Business or display name</label>
+      <input id="profile-name" class="input" formControlName="displayName">
+      @if (form.controls.displayName.touched && form.controls.displayName.invalid) {
+        <span class="field-error">Between 2 and 120 characters.</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="profile-city">City</label>
+        <input id="profile-city" class="input" formControlName="city">
+      </div>
+      <div class="field">
+        <label for="profile-years">Years of experience</label>
+        <input id="profile-years" class="input" type="number" min="0" max="60" formControlName="yearsExperience">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="profile-address">Address <span class="muted">(optional)</span></label>
+      <input id="profile-address" class="input" formControlName="address" aria-describedby="profile-address-hint">
+      <span id="profile-address-hint" class="hint">Shown on your public page, for owners who bring their pet to you.</span>
+    </div>
+
+    <div class="field">
+      <label for="profile-bio">About you</label>
+      <textarea id="profile-bio" class="input" rows="7" formControlName="bio" maxlength="2000"
+                aria-describedby="profile-bio-hint"></textarea>
+      <span id="profile-bio-hint" class="hint">
+        {{ form.controls.bio.value.length }} / 2000 characters. At least {{ minBioLength }} are needed for verification.
+        Describe your experience, qualifications and how you work with animals.
+      </span>
+    </div>
+
+    <div class="row">
+      <button class="btn btn-primary" type="submit" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+      @if (canSubmit(profile)) {
+        <button class="btn" type="button" [disabled]="submitting()" (click)="submitForVerification()">
+          {{ submitting() ? 'Sending…' : 'Send for verification' }}
+        </button>
+      }
+    </div>
+  </form>
+}

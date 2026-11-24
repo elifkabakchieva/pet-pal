@@ -1,0 +1,112 @@
+<section class="container">
+  <div class="page-head">
+    <div>
+      <p class="overline">Find care</p>
+      <h1>
+        @if (search().category; as category) { {{ categoryLabels[category] }} } @else { Pet care }
+        @if (search().city; as city) { in {{ city }} }
+      </h1>
+    </div>
+  </div>
+
+  <div class="layout">
+    <form class="filters" [formGroup]="form" (ngSubmit)="apply()" aria-label="Search filters">
+      <div class="field">
+        <label for="filter-category">Service</label>
+        <select id="filter-category" class="input" formControlName="category">
+          <option value="">Any service</option>
+          @for (category of categories(); track category.code) {
+            <option [value]="category.code">{{ category.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-city">City</label>
+        <input id="filter-city" class="input" formControlName="city" autocomplete="address-level2">
+      </div>
+      <div class="field">
+        <label for="filter-price">Max price ({{ currency }})</label>
+        <input id="filter-price" class="input" type="number" min="1" step="1" formControlName="maxPrice">
+      </div>
+      <div class="field">
+        <label for="filter-rating">Rating</label>
+        <select id="filter-rating" class="input" formControlName="minRating">
+          <option value="">Any rating</option>
+          <option value="3">3 and up</option>
+          <option value="4">4 and up</option>
+          <option value="4.5">4.5 and up</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-q">Name or keyword</label>
+        <input id="filter-q" class="input" formControlName="q" maxlength="100">
+      </div>
+      <div class="field">
+        <label for="filter-sort">Sort by</label>
+        <select id="filter-sort" class="input" formControlName="sort">
+          @for (option of sorts; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" type="submit">Apply</button>
+        <a class="btn btn-quiet" routerLink="/providers">Clear</a>
+      </div>
+    </form>
+
+    <div>
+      @if (loading()) {
+        <p class="muted">Looking for providers…</p>
+      } @else if (error(); as message) {
+        <div class="notice notice-error" role="alert">
+          <p>{{ message }}</p>
+          <button class="btn btn-small" type="button" (click)="retry()">Try again</button>
+        </div>
+      } @else if (result(); as page) {
+        @if (page.content.length === 0) {
+          <pp-empty-state title="No providers found"
+                          text="No verified providers match these filters. Try another city or remove the price limit." />
+        } @else {
+          <p class="muted small">{{ page.totalElements }} {{ page.totalElements === 1 ? 'provider' : 'providers' }}</p>
+          <ul class="list-rows">
+            @for (provider of page.content; track provider.id) {
+              <li class="result">
+                <div>
+                  <h3 class="m-0"><a [routerLink]="['/providers', provider.id]">{{ provider.displayName }}</a></h3>
+                  <p class="muted small">{{ provider.city }} · {{ provider.yearsExperience }} years of experience</p>
+                  @if (provider.bioExcerpt) {
+                    <p class="reading">{{ provider.bioExcerpt }}</p>
+                  }
+                  <div class="row">
+                    @for (code of provider.categories; track code) {
+                      <span class="tag">{{ categoryLabels[code] }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="side">
+                  <pp-rating-stars [rating]="provider.ratingAverage" [count]="provider.reviewCount" />
+                  @if (provider.startingPrice !== null) {
+                    <span>from <strong>{{ provider.startingPrice | currency: currency }}</strong></span>
+                  }
+                  <a class="btn btn-small" [routerLink]="['/providers', provider.id]">See times</a>
+                </div>
+              </li>
+            }
+          </ul>
+
+          @if (page.totalPages > 1) {
+            <nav class="pager" aria-label="Pages">
+              <button class="btn btn-small" type="button" [disabled]="page.page === 0" (click)="goToPage(page.page - 1)">
+                Previous
+              </button>
+              <span class="muted small">Page {{ page.page + 1 }} of {{ page.totalPages }}</span>
+              <button class="btn btn-small" type="button" [disabled]="page.page + 1 >= page.totalPages"
+                      (click)="goToPage(page.page + 1)">Next</button>
+            </nav>
+          }
+        }
+      }
+    </div>
+  </div>
+</section>

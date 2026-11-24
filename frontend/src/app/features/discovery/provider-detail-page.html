@@ -1,0 +1,84 @@
+<section class="container">
+  @if (loading()) {
+    <p class="muted">Loading…</p>
+  } @else if (error(); as message) {
+    <div class="notice notice-error" role="alert">{{ message }}</div>
+  } @else if (provider(); as provider) {
+    <div class="split">
+      <div>
+        <p class="overline">{{ provider.city }}</p>
+        <h1>{{ provider.displayName }}</h1>
+        <p class="row facts-line">
+          <pp-rating-stars [rating]="provider.ratingAverage" [count]="provider.reviewCount" />
+          <span class="muted">· {{ provider.yearsExperience }} years of experience</span>
+          <span class="muted">· on PetPal since {{ provider.memberSince | date: 'MMMM y' }}</span>
+        </p>
+        @if (provider.address) {
+          <p class="muted">{{ provider.address }}, {{ provider.city }}</p>
+        }
+        @if (provider.bio) {
+          <p class="reading pre-line">{{ provider.bio }}</p>
+        }
+
+        <h2 class="section-title">Services</h2>
+        <ul class="list-rows">
+          @for (service of provider.services; track service.id) {
+            <li class="service">
+              <div>
+                <h3 class="m-0">{{ service.title }}</h3>
+                <p class="muted small">{{ service.categoryName }} · {{ durationLabel(service.durationMinutes) }}</p>
+                @if (service.description) {
+                  <p class="reading">{{ service.description }}</p>
+                }
+              </div>
+              <strong>{{ service.price | currency: provider.currency }}</strong>
+            </li>
+          }
+        </ul>
+
+        <h2 class="section-title">Weekly hours</h2>
+        <dl class="facts">
+          @for (entry of hoursByDay(); track entry.day) {
+            <dt>{{ entry.label }}</dt>
+            <dd>
+              @for (window of entry.windows; track window.startTime; let last = $last) {
+                {{ timeLabel(window.startTime) }}–{{ timeLabel(window.endTime) }}@if (!last) {, }
+              } @empty {
+                <span class="muted">Closed</span>
+              }
+            </dd>
+          }
+        </dl>
+
+        <h2 class="section-title">Reviews</h2>
+        @if (reviews().length === 0) {
+          <p class="muted">No reviews yet. Reviews come from owners after a completed booking.</p>
+        } @else {
+          <ul class="list-rows">
+            @for (review of reviews(); track review.id) {
+              <li>
+                <div class="row between">
+                  <strong><span class="star" aria-hidden="true">{{ '★'.repeat(review.rating) }}</span>
+                    <span class="visually-hidden">{{ review.rating }} out of 5</span></strong>
+                  <span class="muted small">{{ review.authorName }} · {{ review.createdAt | date: 'd MMM y' }}</span>
+                </div>
+                @if (review.comment) {
+                  <p class="reading m-0 mt-s">{{ review.comment }}</p>
+                }
+              </li>
+            }
+          </ul>
+          @if (nextReviewPage() !== null) {
+            <button class="btn btn-small mt-m" type="button" (click)="loadReviews(provider.id, nextReviewPage()!)">
+              Show more reviews
+            </button>
+          }
+        }
+      </div>
+
+      <aside>
+        <pp-booking-panel [providerId]="provider.id" [services]="provider.services" [currency]="provider.currency" />
+      </aside>
+    </div>
+  }
+</section>

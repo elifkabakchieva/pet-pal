@@ -1,0 +1,87 @@
+<section class="container">
+  <h1>Create your account</h1>
+  <p class="muted">It takes a minute. You can book or offer care right after.</p>
+
+  @if (error(); as message) {
+    <div class="notice notice-error" role="alert">{{ message }}</div>
+  }
+
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <fieldset>
+      <legend>I want to</legend>
+      <div class="choices">
+        <label class="choice">
+          <input type="radio" formControlName="accountType" value="OWNER">
+          <span><strong>Book care for my pet</strong><span class="small muted">Find providers and send requests.</span></span>
+        </label>
+        <label class="choice">
+          <input type="radio" formControlName="accountType" value="PROVIDER">
+          <span><strong>I offer pet care</strong><span class="small muted">Show your services and take requests.</span></span>
+        </label>
+      </div>
+    </fieldset>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="reg-first">First name</label>
+        <input id="reg-first" class="input" formControlName="firstName" autocomplete="given-name"
+               aria-describedby="reg-first-error">
+        @if (form.controls.firstName.touched && form.controls.firstName.errors; as errors) {
+          <span id="reg-first-error" class="field-error">{{ errors['server'] ?? 'Enter your first name.' }}</span>
+        }
+      </div>
+      <div class="field">
+        <label for="reg-last">Last name</label>
+        <input id="reg-last" class="input" formControlName="lastName" autocomplete="family-name"
+               aria-describedby="reg-last-error">
+        @if (form.controls.lastName.touched && form.controls.lastName.errors; as errors) {
+          <span id="reg-last-error" class="field-error">{{ errors['server'] ?? 'Enter your last name.' }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="reg-email">E-mail</label>
+      <input id="reg-email" class="input" type="email" formControlName="email" autocomplete="email"
+             aria-describedby="reg-email-error">
+      @if (form.controls.email.touched && form.controls.email.errors; as errors) {
+        <span id="reg-email-error" class="field-error">{{ errors['server'] ?? 'Enter a valid e-mail address.' }}</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="reg-password">Password</label>
+      <input id="reg-password" class="input" type="password" formControlName="password" autocomplete="new-password"
+             aria-describedby="reg-password-hint">
+      <span id="reg-password-hint" [class]="form.controls.password.touched && form.controls.password.invalid ? 'field-error' : 'hint'">
+        At least 8 characters.
+      </span>
+    </div>
+
+    <div class="form-row">
+      <div class="field">
+        <label for="reg-city">City</label>
+        <input id="reg-city" class="input" formControlName="city" autocomplete="address-level2"
+               aria-describedby="reg-city-error">
+        @if (form.controls.city.touched && form.controls.city.errors; as errors) {
+          <span id="reg-city-error" class="field-error">{{ errors['server'] ?? 'Enter your city.' }}</span>
+        }
+      </div>
+      <div class="field">
+        <label for="reg-phone">Phone <span class="muted">(optional)</span></label>
+        <input id="reg-phone" class="input" type="tel" formControlName="phone" autocomplete="tel"
+               aria-describedby="reg-phone-hint">
+        <span id="reg-phone-hint" [class]="form.controls.phone.invalid ? 'field-error' : 'hint'">
+          Shared only with people you have a confirmed booking with.
+        </span>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn btn-primary" type="submit" [disabled]="pending()">
+        {{ pending() ? 'Creating account…' : 'Create account' }}
+      </button>
+      <span class="muted">Already registered? <a routerLink="/login">Sign in</a>.</span>
+    </div>
+  </form>
+</section>

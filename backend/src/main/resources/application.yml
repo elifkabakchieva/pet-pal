@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: petpal
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/petpal}
+    username: ${DB_USER:petpal}
+    password: ${DB_PASSWORD:petpal}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+petpal:
+  business-zone: Europe/Sofia
+  currency: EUR
+  security:
+    jwt-secret: ${JWT_SECRET:dev-only-secret-0123456789-abcdefghijklmnopqrstuvwxyz-ABCDEFGH}
+    token-ttl: PT8H
+  admin:
+    email: ${ADMIN_EMAIL:admin@petpal.local}
+    password: ${ADMIN_PASSWORD:admin-password}
+  booking:
+    slot-step: PT30M
+    min-lead-time: PT2H
+    horizon: P60D
+    owner-cancellation-cutoff: PT12H
+    expiry-enabled: true
+    expiry-check-interval: PT5M
+
+logging:
+  level:
+    com.petpal: INFO

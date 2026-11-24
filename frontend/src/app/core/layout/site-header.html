@@ -1,0 +1,39 @@
+<header class="site-header">
+  <div class="container bar">
+    <a class="wordmark" routerLink="/">PetPal</a>
+
+    <nav class="nav" aria-label="Main">
+      <a routerLink="/providers" routerLinkActive="active">Find care</a>
+      @switch (auth.role()) {
+        @case ('OWNER') {
+          <a routerLink="/pets" routerLinkActive="active">My pets</a>
+          <a routerLink="/bookings" routerLinkActive="active">Bookings</a>
+        }
+        @case ('PROVIDER') {
+          <a routerLink="/workspace" routerLinkActive="active">Workspace</a>
+          <a routerLink="/bookings" routerLinkActive="active">Bookings</a>
+        }
+        @case ('ADMIN') {
+          <a routerLink="/admin/verification" routerLinkActive="active">Verification</a>
+        }
+      }
+    </nav>
+
+    <div class="account">
+      @if (auth.user(); as user) {
+        <a routerLink="/notifications" routerLinkActive="active"
+           [attr.aria-label]="'Notifications, ' + notifications.unread() + ' unread'">
+          Notifications
+          @if (notifications.unread() > 0) {
+            <span class="badge badge-clay">{{ notifications.unread() }}</span>
+          }
+        </a>
+        <span class="who">{{ user.firstName }}</span>
+        <button type="button" class="btn btn-small" (click)="signOut()">Sign out</button>
+      } @else {
+        <a class="btn btn-quiet" routerLink="/login">Sign in</a>
+        <a class="btn btn-primary btn-small" routerLink="/register">Create account</a>
+      }
+    </div>
+  </div>
+</header>

@@ -1,0 +1,80 @@
+<section class="container intro">
+  <div>
+    <p class="overline">Pet care in your city</p>
+    <h1>Good care for your pet, from people nearby who do it well.</h1>
+    <p class="lead">
+      PetPal lists groomers, walkers, trainers, vets and daycare providers that our team has checked.
+      See their prices and their free times, then send a booking request in a few steps.
+    </p>
+  </div>
+
+  <form class="panel search" [formGroup]="form" (ngSubmit)="search()">
+    <h2>Find care</h2>
+    <div class="field">
+      <label for="home-category">Service</label>
+      <select id="home-category" class="input" formControlName="category">
+        <option value="">Any service</option>
+        @for (category of categories; track category.code) {
+          <option [value]="category.code">{{ category.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="field">
+      <label for="home-city">City</label>
+      <input id="home-city" class="input" formControlName="city" placeholder="For example Sofia"
+             autocomplete="address-level2">
+    </div>
+    <button class="btn btn-primary" type="submit">Search</button>
+  </form>
+</section>
+
+<section class="container section">
+  <h2>What you can book</h2>
+  <dl class="services">
+    @for (category of categories; track category.code) {
+      <div>
+        <dt>{{ category.name }}</dt>
+        <dd>{{ category.description }}</dd>
+      </div>
+    }
+  </dl>
+</section>
+
+<section class="container section">
+  <h2>How booking works</h2>
+  <ol class="steps">
+    <li>
+      <span class="step-number" aria-hidden="true">1</span>
+      <div>
+        <h3>Find a verified provider</h3>
+        <p>Search by service and city. Every provider has been checked by our team before they appear here.</p>
+      </div>
+    </li>
+    <li>
+      <span class="step-number" aria-hidden="true">2</span>
+      <div>
+        <h3>Pick a free time for your pet</h3>
+        <p>Choose a service, your pet and one of the open times from the provider's own calendar.</p>
+      </div>
+    </li>
+    <li>
+      <span class="step-number" aria-hidden="true">3</span>
+      <div>
+        <h3>Get a confirmation</h3>
+        <p>The provider confirms or declines your request. You see the status and get a notification either way.</p>
+      </div>
+    </li>
+  </ol>
+</section>
+
+<section class="container section">
+  <div class="panel callout">
+    <div>
+      <h2>Do you look after pets for a living?</h2>
+      <p class="muted">
+        Groomers, walkers, trainers, vets and daycare: set your own hours, show your prices and take requests online.
+      </p>
+    </div>
+    <a class="btn" routerLink="/register" [queryParams]="{ type: 'PROVIDER' }">Offer your services</a>
+  </div>
+</section>

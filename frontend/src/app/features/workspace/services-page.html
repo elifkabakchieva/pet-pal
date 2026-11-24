@@ -1,0 +1,95 @@
+<div class="page-head">
+  <p class="muted">What you offer, how long it takes and what it costs.</p>
+  @if (!formOpen()) {
+    <button class="btn btn-primary" type="button" (click)="startCreate()">Add a service</button>
+  }
+</div>
+
+@if (formOpen()) {
+  <div class="panel mb-l">
+    <h2>{{ editing() ? 'Edit service' : 'New service' }}</h2>
+    @if (formError(); as message) {
+      <div class="notice notice-error" role="alert">{{ message }}</div>
+    }
+    <form class="form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+      <div class="form-row">
+        <div class="field">
+          <label for="service-category">Category</label>
+          <select id="service-category" class="input" formControlName="categoryCode">
+            @for (category of categories(); track category.code) {
+              <option [value]="category.code">{{ category.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="field">
+          <label for="service-duration">Duration</label>
+          <select id="service-duration" class="input" formControlName="durationMinutes">
+            @for (minutes of durations; track minutes) {
+              <option [ngValue]="minutes">{{ durationLabel(minutes) }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="service-title">Title</label>
+        <input id="service-title" class="input" formControlName="title" placeholder="For example: Full groom, medium dog">
+        @if (form.controls.title.touched && form.controls.title.invalid) {
+          <span class="field-error">Between 3 and 120 characters.</span>
+        }
+      </div>
+      <div class="field">
+        <label for="service-price">Price in EUR</label>
+        <input id="service-price" class="input" type="number" min="1" max="10000" step="0.5" formControlName="price">
+        @if (form.controls.price.touched && form.controls.price.invalid) {
+          <span class="field-error">Between 1 and 10 000.</span>
+        }
+      </div>
+      <div class="field">
+        <label for="service-description">Description <span class="muted">(optional)</span></label>
+        <textarea id="service-description" class="input" formControlName="description" maxlength="1000"></textarea>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" type="submit" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+        <button class="btn btn-quiet" type="button" (click)="closeForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (loading()) {
+  <p class="muted">Loading services…</p>
+} @else if (error(); as message) {
+  <div class="notice notice-error" role="alert">
+    <p>{{ message }}</p>
+    <button class="btn btn-small" type="button" (click)="load()">Try again</button>
+  </div>
+} @else if (services().length === 0) {
+  <pp-empty-state title="No services yet" text="Add the first thing you offer, with its price and duration." />
+} @else {
+  <table class="table">
+    <thead>
+      <tr><th>Service</th><th>Category</th><th>Duration</th><th>Price</th><th>Status</th><th><span class="small">Actions</span></th></tr>
+    </thead>
+    <tbody>
+      @for (service of services(); track service.id) {
+        <tr>
+          <td data-label="Service"><strong>{{ service.title }}</strong></td>
+          <td data-label="Category">{{ service.categoryName }}</td>
+          <td data-label="Duration">{{ durationLabel(service.durationMinutes) }}</td>
+          <td data-label="Price">{{ service.price | currency: currency }}</td>
+          <td data-label="Status">
+            <span [class]="service.active ? 'badge badge-pine' : 'badge'">{{ service.active ? 'Offered' : 'Stopped' }}</span>
+          </td>
+          <td data-label="">
+            @if (service.active) {
+              <div class="row">
+                <button class="btn btn-small" type="button" (click)="startEdit(service)">Edit</button>
+                <button class="btn btn-small btn-danger" type="button" (click)="deactivate(service)">Stop offering</button>
+              </div>
+            }
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

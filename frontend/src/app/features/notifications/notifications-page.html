@@ -1,0 +1,38 @@
+<section class="container">
+  <div class="page-head">
+    <div>
+      <p class="overline">Your account</p>
+      <h1>Notifications</h1>
+    </div>
+    @if (hasUnread()) {
+      <button class="btn" type="button" (click)="markAllRead()">Mark all as read</button>
+    }
+  </div>
+
+  @if (error(); as message) {
+    <div class="notice notice-error" role="alert">{{ message }}</div>
+  }
+
+  @if (!loading() && items().length === 0) {
+    <pp-empty-state title="Nothing new" text="Updates about your bookings and your profile will show up here." />
+  } @else {
+    <ul class="list-rows">
+      @for (item of items(); track item.id) {
+        <li>
+          <button type="button" class="btn btn-quiet m-0" (click)="open(item)">
+            @if (!item.read) {
+              <span class="badge badge-clay">New</span>
+            }
+            {{ item.message }}
+          </button>
+          <div class="muted small">{{ item.createdAt | date: 'd MMM y, HH:mm' }}</div>
+        </li>
+      }
+    </ul>
+    @if (loading()) {
+      <p class="muted">Loading…</p>
+    } @else if (nextPage() !== null) {
+      <button class="btn mt-m" type="button" (click)="loadPage(nextPage()!)">Show older</button>
+    }
+  }
+</section>

@@ -1,0 +1,71 @@
+<section class="container">
+  <div class="page-head">
+    <div>
+      <p class="overline">Admin</p>
+      <h1>Provider verification</h1>
+    </div>
+  </div>
+
+  <nav class="tabs" aria-label="Verification status">
+    @for (tab of tabs; track tab.status) {
+      <button type="button" [class.active]="status() === tab.status" (click)="select(tab.status)">{{ tab.label }}</button>
+    }
+  </nav>
+
+  @if (notice(); as message) {
+    <div class="notice notice-success" role="status">{{ message }}</div>
+  }
+  @if (error(); as message) {
+    <div class="notice notice-error" role="alert">{{ message }}</div>
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading profiles…</p>
+  } @else if (providers().length === 0) {
+    <pp-empty-state title="Nothing here" text="No provider profiles with this status right now." />
+  } @else {
+    <ul class="list-rows">
+      @for (provider of providers(); track provider.id) {
+        <li>
+          <div class="row between">
+            <h3 class="m-0">{{ provider.displayName }}</h3>
+            <pp-status-badge [status]="provider.verificationStatus" />
+          </div>
+          <dl class="facts my-m">
+            <dt>Contact</dt><dd>{{ provider.contactName }} · {{ provider.email }}@if (provider.phone) { · {{ provider.phone }}}</dd>
+            <dt>City</dt><dd>{{ provider.city }}@if (provider.address) {, {{ provider.address }}}</dd>
+            <dt>Experience</dt><dd>{{ provider.yearsExperience }} years</dd>
+            @if (provider.submittedAt) {
+              <dt>Sent</dt><dd>{{ provider.submittedAt | date: 'd MMM y, HH:mm' }}</dd>
+            }
+            @if (provider.verificationNote) {
+              <dt>Last note</dt><dd>{{ provider.verificationNote }}</dd>
+            }
+          </dl>
+          <p class="reading pre-line">{{ provider.bio }}</p>
+
+          @if (provider.verificationStatus === 'PENDING') {
+            @if (rejectingId() === provider.id) {
+              <div class="field narrow">
+                <label [for]="'note-' + provider.id">Why is the profile not verified?</label>
+                <textarea class="input" [id]="'note-' + provider.id" maxlength="500"
+                          [value]="rejectNote()" (input)="noteInput($event)"></textarea>
+              </div>
+              <div class="row mt-s">
+                <button class="btn btn-danger" type="button" [disabled]="busyId() === provider.id"
+                        (click)="confirmReject(provider)">Send rejection</button>
+                <button class="btn btn-quiet" type="button" (click)="rejectingId.set(null)">Cancel</button>
+              </div>
+            } @else {
+              <div class="row">
+                <button class="btn btn-primary" type="button" [disabled]="busyId() === provider.id"
+                        (click)="approve(provider)">Approve</button>
+                <button class="btn" type="button" (click)="startReject(provider)">Reject…</button>
+              </div>
+            }
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

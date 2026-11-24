@@ -1,0 +1,50 @@
+<p class="muted">
+  Owners can book you inside these hours. Times are on the quarter hour. A day without hours is a day off.
+  Changing hours never cancels bookings you already have.
+</p>
+
+@if (message(); as msg) {
+  <div class="notice" [class.notice-success]="msg.tone === 'success'" [class.notice-error]="msg.tone === 'error'"
+       role="status">{{ msg.text }}</div>
+}
+
+@if (loading()) {
+  <p class="muted">Loading your hours…</p>
+} @else {
+  <table class="table">
+    <thead>
+      <tr><th>Day</th><th>Hours</th><th><span class="small">Add</span></th></tr>
+    </thead>
+    <tbody>
+      @for (day of days; track day) {
+        <tr>
+          <td data-label="Day"><strong>{{ dayLabels[day] }}</strong></td>
+          <td data-label="Hours">
+            @for (window of windowsOf(day); track window.key) {
+              <div class="row mb-s">
+                <label class="small" [for]="'start-' + window.key">From</label>
+                <input class="input w-auto" type="time" step="900" [id]="'start-' + window.key"
+                       [value]="window.startTime" (change)="change(window.key, 'startTime', $event)">
+                <label class="small" [for]="'end-' + window.key">to</label>
+                <input class="input w-auto" type="time" step="900" [id]="'end-' + window.key"
+                       [value]="window.endTime" (change)="change(window.key, 'endTime', $event)">
+                <button class="btn btn-quiet btn-small" type="button" (click)="remove(window.key)">Remove</button>
+              </div>
+            } @empty {
+              <span class="muted">Closed</span>
+            }
+          </td>
+          <td data-label="">
+            <button class="btn btn-small" type="button" (click)="add(day)">Add time</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="row mt-m">
+    <button class="btn btn-primary" type="button" [disabled]="saving()" (click)="save()">
+      {{ saving() ? 'Saving…' : 'Save weekly hours' }}
+    </button>
+  </div>
+}

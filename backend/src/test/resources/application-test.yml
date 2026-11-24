@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/petpal_test}
+  flyway:
+    clean-disabled: false
+
+petpal:
+  admin:
+    email: admin@test.petpal
+    password: admin-test-password
+  booking:
+    expiry-enabled: false
+
+logging:
+  level:
+    com.petpal: INFO

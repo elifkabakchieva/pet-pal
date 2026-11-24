@@ -1,0 +1,70 @@
+<section class="container">
+  <div class="page-head">
+    <div>
+      <p class="overline">{{ isProvider() ? 'Your calendar' : 'Your account' }}</p>
+      <h1>Bookings</h1>
+    </div>
+    @if (!isProvider()) {
+      <a class="btn" routerLink="/providers">Find care</a>
+    }
+  </div>
+
+  <nav class="tabs" aria-label="Booking lists">
+    @for (tab of tabs; track tab.key) {
+      <a [routerLink]="[]" [queryParams]="{ tab: tab.key === 'requests' ? null : tab.key }"
+         [class.active]="current().key === tab.key">{{ tab.label }}</a>
+    }
+  </nav>
+
+  @if (loading()) {
+    <p class="muted">Loading bookings…</p>
+  } @else if (error(); as message) {
+    <div class="notice notice-error" role="alert">
+      <p>{{ message }}</p>
+      <button class="btn btn-small" type="button" (click)="load()">Try again</button>
+    </div>
+  } @else if (page(); as page) {
+    @if (page.content.length === 0) {
+      <pp-empty-state [title]="current().label" [text]="current().empty">
+        @if (!isProvider()) {
+          <a class="btn" routerLink="/providers">Find a provider</a>
+        }
+      </pp-empty-state>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th>When</th><th>Service</th><th>Pet</th><th>{{ isProvider() ? 'Owner' : 'Provider' }}</th>
+            <th>Price</th><th>Status</th><th><span class="small">Open</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (booking of page.content; track booking.id) {
+            <tr>
+              <td data-label="When"><strong>{{ booking.startAt | date: 'EEE d MMM, HH:mm' }}</strong></td>
+              <td data-label="Service">{{ booking.service.title }}</td>
+              <td data-label="Pet">{{ booking.pet.name }}</td>
+              <td [attr.data-label]="isProvider() ? 'Owner' : 'Provider'">
+                {{ isProvider() ? booking.owner.name : booking.provider.displayName }}
+              </td>
+              <td data-label="Price">{{ booking.price | currency: booking.currency }}</td>
+              <td data-label="Status"><pp-status-badge [status]="booking.status" /></td>
+              <td data-label=""><a class="btn btn-small" [routerLink]="['/bookings', booking.id]">Open</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (page.totalPages > 1) {
+        <nav class="pager" aria-label="Pages">
+          <button class="btn btn-small" type="button" [disabled]="page.page === 0" (click)="load(current(), page.page - 1)">
+            Previous
+          </button>
+          <span class="muted small">Page {{ page.page + 1 }} of {{ page.totalPages }}</span>
+          <button class="btn btn-small" type="button" [disabled]="page.page + 1 >= page.totalPages"
+                  (click)="load(current(), page.page + 1)">Next</button>
+        </nav>
+      }
+    }
+  }
+</section>

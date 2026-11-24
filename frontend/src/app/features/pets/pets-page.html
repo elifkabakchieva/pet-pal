@@ -1,0 +1,56 @@
+<section class="container">
+  <div class="page-head">
+    <div>
+      <p class="overline">Your account</p>
+      <h1>My pets</h1>
+    </div>
+    @if (!formOpen()) {
+      <button class="btn btn-primary" type="button" (click)="startCreate()">Add a pet</button>
+    }
+  </div>
+
+  @if (formOpen()) {
+    <div class="panel form-panel">
+      <h2>{{ editing() ? 'Edit ' + editing()!.name : 'New pet' }}</h2>
+      @if (formError(); as message) {
+        <div class="notice notice-error" role="alert">{{ message }}</div>
+      }
+      <pp-pet-form [pet]="editing()" [pending]="saving()" (saved)="save($event)" (cancelled)="closeForm()" />
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading your pets…</p>
+  } @else if (error(); as message) {
+    <div class="notice notice-error" role="alert">
+      <p>{{ message }}</p>
+      <button class="btn btn-small" type="button" (click)="load()">Try again</button>
+    </div>
+  } @else if (pets().length === 0) {
+    <pp-empty-state title="No pets yet" text="Add your first pet so you can book care for it.">
+      @if (!formOpen()) {
+        <button class="btn btn-primary" type="button" (click)="startCreate()">Add a pet</button>
+      }
+    </pp-empty-state>
+  } @else {
+    <ul class="list-rows">
+      @for (pet of pets(); track pet.id) {
+        <li class="pet">
+          <div>
+            <h3>{{ pet.name }}</h3>
+            <p class="muted">
+              {{ speciesLabels[pet.species] }}@if (pet.breed) {, {{ pet.breed }}}@if (age(pet); as age) { · {{ age }}}@if (pet.weightKg) { · {{ pet.weightKg }} kg}
+            </p>
+            @if (pet.careNotes) {
+              <p class="notes">{{ pet.careNotes }}</p>
+            }
+          </div>
+          <div class="row actions">
+            <button class="btn btn-small" type="button" (click)="startEdit(pet)">Edit</button>
+            <button class="btn btn-small btn-danger" type="button" (click)="remove(pet)">Remove</button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
